@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Questionnaire</title>
+    <link rel="stylesheet" href="/static/style.css?v=4">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Welcome</h1>
+            <p class="subtitle">Let's have a friendly chat</p>
+        </header>
+
+        <main id="chat-container">
+            <div id="messages"></div>
+
+            <div id="input-area" class="hidden">
+                <!-- Dynamic input will be inserted here -->
+            </div>
+
+            <div id="start-screen">
+                <p>Ready to begin? Click the button below to start.</p>
+                <button id="start-btn" class="btn-primary">Start Questionnaire</button>
+            </div>
+        </main>
+
+        <footer>
+            <div id="progress" class="hidden">
+                <div id="progress-bar"></div>
+            </div>
+        </footer>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
