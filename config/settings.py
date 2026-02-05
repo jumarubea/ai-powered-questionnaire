@@ -13,10 +13,16 @@ class Settings:
 
     # Google Sheets
     GOOGLE_SHEET_ID: str = os.getenv("GOOGLE_SHEET_ID", "")
+    
+    # Google credentials - can be file path (local) or JSON string (production)
     GOOGLE_CREDENTIALS_FILE: str = os.getenv(
         "GOOGLE_CREDENTIALS_FILE",
         str(BASE_DIR / "credentials.json")
     )
+    GOOGLE_CREDENTIALS_JSON: str = os.getenv("GOOGLE_CREDENTIALS_JSON", "")
+    
+    # Environment detection
+    ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
 
     # Question source: "json", "sheets", or "both"
     QUESTION_SOURCE: str = os.getenv("QUESTION_SOURCE", "json")

@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: ai-questionnaire
+    runtime: python
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    plan: free
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: MODEL
+        value: gemini-1.5-flash
+      - key: MODEL_API_KEY
+        sync: false  # You'll need to set this manually in Render dashboard
+      - key: GOOGLE_SHEET_ID
+        sync: false  # Set this manually
+      - key: GOOGLE_CREDENTIALS_JSON
+        sync: false  # JSON credentials as string
+      - key: QUESTION_SOURCE
+        value: json
+      - key: SHEET_NAME
+        value: Sheet1
+    healthCheckPath: /health

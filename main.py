@@ -58,6 +58,12 @@ async def index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for monitoring."""
+    return {"status": "healthy", "service": "ai-questionnaire"}
+
+
 @app.post("/api/start", response_model=StartResponse)
 async def start_questionnaire():
     """Start a new questionnaire session."""

@@ -1,4 +1,5 @@
 import re
+import json
 from datetime import datetime
 import gspread
 from google.oauth2.service_account import Credentials
@@ -23,20 +24,32 @@ class GoogleSheetsStorage:
 
     def _connect(self) -> None:
         """Connect to Google Sheets using service account credentials."""
-        creds_path = Path(settings.GOOGLE_CREDENTIALS_FILE)
-
-        if not creds_path.exists():
-            raise FileNotFoundError(
-                f"Google credentials file not found at {creds_path}."
-            )
-
         if not settings.GOOGLE_SHEET_ID:
             raise ValueError("GOOGLE_SHEET_ID not set in environment.")
 
-        credentials = Credentials.from_service_account_file(
-            str(creds_path),
-            scopes=self.SCOPES
-        )
+        # Production: Use JSON credentials from environment variable
+        if settings.GOOGLE_CREDENTIALS_JSON:
+            try:
+                credentials_info = json.loads(settings.GOOGLE_CREDENTIALS_JSON)
+                credentials = Credentials.from_service_account_info(
+                    credentials_info,
+                    scopes=self.SCOPES
+                )
+            except json.JSONDecodeError as e:
+                raise ValueError(f"Invalid JSON in GOOGLE_CREDENTIALS_JSON: {e}")
+        else:
+            # Development: Use credentials file
+            creds_path = Path(settings.GOOGLE_CREDENTIALS_FILE)
+            if not creds_path.exists():
+                raise FileNotFoundError(
+                    f"Google credentials file not found at {creds_path}. "
+                    f"For production, set GOOGLE_CREDENTIALS_JSON environment variable."
+                )
+            
+            credentials = Credentials.from_service_account_file(
+                str(creds_path),
+                scopes=self.SCOPES
+            )
 
         self.client = gspread.authorize(credentials)
         self.spreadsheet = self.client.open_by_key(settings.GOOGLE_SHEET_ID)
