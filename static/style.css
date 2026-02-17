@@ -230,6 +230,27 @@ main {
     cursor: pointer;
 }
 
+/* Other option text input (shown below options) */
+.other-input-wrapper {
+    margin-bottom: 1rem;
+}
+
+.other-text-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--border);
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background: white;
+}
+
+.other-text-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
+}
+
 /* Yes/No toggle */
 .yes-no-group {
     display: flex;
@@ -332,6 +353,104 @@ footer {
     color: white;
     font-size: 2rem;
     box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+.share-link {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.share-link:hover {
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+}
+
+/* Share popup */
+.share-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    animation: fadeIn 0.2s ease;
+}
+
+.share-popup {
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    width: 90%;
+    max-width: 420px;
+    position: relative;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+}
+
+.share-popup h3 {
+    margin-bottom: 0.5rem;
+    color: var(--text);
+}
+
+.share-popup p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.share-close {
+    position: absolute;
+    top: 0.75rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    line-height: 1;
+}
+
+.share-close:hover {
+    color: var(--text);
+}
+
+.share-url-group {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.share-url-input {
+    flex: 1;
+    padding: 0.625rem 0.75rem;
+    border: 2px solid var(--border);
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--text);
+    background: var(--bg);
+    outline: none;
+    min-width: 0;
+}
+
+.share-copy-btn {
+    white-space: nowrap;
+    padding: 0.625rem 1.25rem;
+}
+
+.share-copied {
+    color: var(--primary) !important;
+    font-weight: 500;
+    margin-top: 0.5rem;
+    margin-bottom: 0 !important;
 }
 
 /* Responsive */

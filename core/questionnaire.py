@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from models import Question, SessionState, UserResponse, AIMessage
+from models import Question, SessionState, UserResponse, AIMessage, SkipCondition
 from .ai_client import AIClient
 from .question_loader import QuestionLoader
 
@@ -10,6 +10,50 @@ class Questionnaire:
         self.ai_client = AIClient()
         self.question_loader = QuestionLoader()
         self.sessions: dict[str, SessionState] = {}
+
+    def _should_skip(self, question: Question, session: SessionState) -> bool:
+        """Check if a question should be skipped based on previous answers."""
+        if not question.skip_when:
+            return False
+
+        response_map = {r.question_id: r.value for r in session.responses}
+
+        for condition in question.skip_when:
+            ref_value = response_map.get(condition.question_id)
+            if ref_value is None:
+                continue
+
+            match condition.operator:
+                case "equals":
+                    if ref_value == condition.value:
+                        return True
+                case "not_equals":
+                    if ref_value != condition.value:
+                        return True
+                case "contains":
+                    if isinstance(ref_value, list) and condition.value in ref_value:
+                        return True
+                case "not_contains":
+                    if isinstance(ref_value, list) and condition.value not in ref_value:
+                        return True
+
+        return False
+
+    def _next_question(self, session: SessionState) -> Question | None:
+        """Get the next non-skipped question from the current index.
+        Skipped questions get an N/A response for consistency."""
+        while session.current_question_index < self.question_loader.total_questions:
+            question = self.question_loader.get_question(session.current_question_index)
+            if question and self._should_skip(question, session):
+                session.responses.append(UserResponse(
+                    question_id=question.id,
+                    value="N/A",
+                    timestamp=datetime.now().isoformat()
+                ))
+                session.current_question_index += 1
+                continue
+            return question
+        return None
 
     def initialize(self) -> None:
         """Load questions on startup."""
@@ -83,9 +127,9 @@ class Questionnaire:
         # Generate appreciation
         appreciation = await self.ai_client.appreciate_response(current_question, str(value))
 
-        # Move to next question
+        # Move to next question (skipping conditional ones)
         session.current_question_index += 1
-        next_question = self.question_loader.get_question(session.current_question_index)
+        next_question = self._next_question(session)
 
         if next_question:
             # Present next question

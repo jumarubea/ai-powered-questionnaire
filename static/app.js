@@ -193,16 +193,55 @@ class QuestionnaireApp {
             </div>
         `).join('');
 
+        if (question.allow_other) {
+            const otherIdx = question.options.length;
+            optionsHtml += `
+                <div class="option-item">
+                    <input type="radio" name="radio-response" id="opt-${otherIdx}" value="__other__">
+                    <label for="opt-${otherIdx}">Other</label>
+                </div>
+            `;
+        }
+
+        const otherInputHtml = question.allow_other ? `
+            <div class="other-input-wrapper hidden" id="other-wrapper">
+                <input type="text" class="other-text-input" id="other-text"
+                       placeholder="Please specify your answer..." autocomplete="off">
+            </div>
+        ` : '';
+
         const html = `
             <div class="options-group">${optionsHtml}</div>
+            ${otherInputHtml}
             <button class="btn-primary" id="submit-btn">Send</button>
         `;
         this.inputAreaEl.innerHTML = html;
 
+        // Show/hide "Other" text input based on radio selection
+        if (question.allow_other) {
+            const radios = document.querySelectorAll('input[name="radio-response"]');
+            const otherWrapper = document.getElementById('other-wrapper');
+            const otherText = document.getElementById('other-text');
+            radios.forEach(radio => {
+                radio.addEventListener('change', () => {
+                    const isOther = document.querySelector('input[name="radio-response"]:checked')?.value === '__other__';
+                    otherWrapper.classList.toggle('hidden', !isOther);
+                    if (isOther) otherText.focus();
+                });
+            });
+        }
+
         const btn = document.getElementById('submit-btn');
         btn.addEventListener('click', () => {
             const selected = document.querySelector('input[name="radio-response"]:checked');
-            if (selected) this.submitResponse(selected.value);
+            if (selected) {
+                if (selected.value === '__other__') {
+                    const otherVal = document.getElementById('other-text').value.trim();
+                    if (otherVal) this.submitResponse(otherVal);
+                } else {
+                    this.submitResponse(selected.value);
+                }
+            }
         });
     }
 
@@ -214,16 +253,51 @@ class QuestionnaireApp {
             </div>
         `).join('');
 
+        if (question.allow_other) {
+            const otherIdx = question.options.length;
+            optionsHtml += `
+                <div class="option-item">
+                    <input type="checkbox" name="checkbox-response" id="chk-${otherIdx}" value="__other__">
+                    <label for="chk-${otherIdx}">Other</label>
+                </div>
+            `;
+        }
+
+        const otherInputHtml = question.allow_other ? `
+            <div class="other-input-wrapper hidden" id="other-wrapper">
+                <input type="text" class="other-text-input" id="other-text"
+                       placeholder="Please specify your answer..." autocomplete="off">
+            </div>
+        ` : '';
+
         const html = `
             <div class="options-group">${optionsHtml}</div>
+            ${otherInputHtml}
             <button class="btn-primary" id="submit-btn">Send</button>
         `;
         this.inputAreaEl.innerHTML = html;
 
+        // Show/hide "Other" text input based on checkbox state
+        if (question.allow_other) {
+            const otherCheckbox = document.getElementById(`chk-${question.options.length}`);
+            const otherWrapper = document.getElementById('other-wrapper');
+            const otherText = document.getElementById('other-text');
+            otherCheckbox.addEventListener('change', () => {
+                otherWrapper.classList.toggle('hidden', !otherCheckbox.checked);
+                if (otherCheckbox.checked) otherText.focus();
+            });
+        }
+
         const btn = document.getElementById('submit-btn');
         btn.addEventListener('click', () => {
             const checked = document.querySelectorAll('input[name="checkbox-response"]:checked');
-            const values = Array.from(checked).map(el => el.value);
+            const values = Array.from(checked).map(el => {
+                if (el.value === '__other__') {
+                    const otherVal = document.getElementById('other-text').value.trim();
+                    return otherVal || null;
+                }
+                return el.value;
+            }).filter(v => v !== null);
             this.submitResponse(values);
         });
     }
@@ -282,9 +356,62 @@ class QuestionnaireApp {
         div.innerHTML = `
             <div class="checkmark">✓</div>
             <p>Your responses have been saved.</p>
+            <button class="share-link" id="share-btn">Share with friends</button>
         `;
         this.messagesEl.appendChild(div);
         this.scrollToBottom();
+
+        document.getElementById('share-btn').addEventListener('click', () => this.showSharePopup());
+    }
+
+    showSharePopup() {
+        const shareUrl = 'https://form.powerconnect.me';
+
+        // Remove existing popup if any
+        const existing = document.getElementById('share-popup-overlay');
+        if (existing) existing.remove();
+
+        const overlay = document.createElement('div');
+        overlay.id = 'share-popup-overlay';
+        overlay.className = 'share-overlay';
+        overlay.innerHTML = `
+            <div class="share-popup">
+                <button class="share-close" id="share-close">&times;</button>
+                <h3>Share with friends</h3>
+                <p>Copy the link below and send it to your friends:</p>
+                <div class="share-url-group">
+                    <input type="text" class="share-url-input" id="share-url" value="${shareUrl}" readonly>
+                    <button class="btn-primary share-copy-btn" id="share-copy">Copy</button>
+                </div>
+                <p class="share-copied hidden" id="share-copied">Copied to clipboard!</p>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+
+        // Close on overlay click
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) overlay.remove();
+        });
+
+        // Close button
+        document.getElementById('share-close').addEventListener('click', () => overlay.remove());
+
+        // Copy button
+        document.getElementById('share-copy').addEventListener('click', () => {
+            const urlInput = document.getElementById('share-url');
+            urlInput.select();
+            urlInput.setSelectionRange(0, 99999);
+            document.execCommand('copy');
+
+            const copiedMsg = document.getElementById('share-copied');
+            copiedMsg.classList.remove('hidden');
+            const copyBtn = document.getElementById('share-copy');
+            copyBtn.textContent = 'Copied!';
+            setTimeout(() => {
+                copiedMsg.classList.add('hidden');
+                copyBtn.textContent = 'Copy';
+            }, 2000);
+        });
     }
 }
 

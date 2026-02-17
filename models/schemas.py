@@ -12,12 +12,21 @@ class QuestionType(str, Enum):
     YES_NO = "yes_no"
 
 
+class SkipCondition(BaseModel):
+    """Skip this question when a previous answer matches a condition."""
+    question_id: str  # ID of the question to check
+    operator: str = "equals"  # "equals", "not_equals", "contains", "not_contains"
+    value: Any  # Value to compare against
+
+
 class Question(BaseModel):
     id: str
     text: str
     type: QuestionType
     required: bool = True
     options: list[str] | None = None  # For checkbox/radio
+    allow_other: bool = False  # Allow "Other" free-text option for radio/checkbox
+    skip_when: list[SkipCondition] | None = None  # Skip if ANY condition is met
     min_value: float | None = Field(None, alias="min")
     max_value: float | None = Field(None, alias="max")
     placeholder: str | None = None

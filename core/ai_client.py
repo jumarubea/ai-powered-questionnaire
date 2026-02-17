@@ -185,11 +185,12 @@ Be specific about what format or information you need. Keep it friendly and brie
 
             case QuestionType.RADIO:
                 if question.options and value not in question.options:
-                    return False, f"Please select one of: {', '.join(question.options)}"
+                    if not question.allow_other:
+                        return False, f"Please select one of: {', '.join(question.options)}"
 
             case QuestionType.CHECKBOX:
                 if isinstance(value, list):
-                    if question.options:
+                    if question.options and not question.allow_other:
                         invalid = [v for v in value if v not in question.options]
                         if invalid:
                             return False, f"Invalid options: {', '.join(invalid)}"

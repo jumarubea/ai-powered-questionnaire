@@ -1,6 +1,7 @@
 from .schemas import (
     Question,
     QuestionType,
+    SkipCondition,
     UserResponse,
     SessionState,
     AIMessage,
@@ -10,6 +11,7 @@ from .schemas import (
 __all__ = [
     "Question",
     "QuestionType",
+    "SkipCondition",
     "UserResponse",
     "SessionState",
     "AIMessage",
